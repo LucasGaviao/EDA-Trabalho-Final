@@ -25,31 +25,38 @@ void THASH_escreve(char *nomeArq, TA *aluno) {
     int indice = THASH_h();
     TA *registro = TA_inicializa();
     int tentativas = 0;
+
     fseek(arq, (sizeof(TA) * indice), SEEK_SET);
-    fread(registro, sizeof(TA), 1, arq);
+    TA_leitura(arq, registro);
     while (registro->cpf != -1 && tentativas < TAM) {
         printf("[THASH_escreve] to no while, teve colisão!\n");
         printf("reg:%lld  aluno: %lld\n", registro->cpf, aluno->cpf);
+
         if (registro->cpf == aluno->cpf) {
             printf("Aluno ja esta na tabela!\n");
             fclose(arq);
             return;
         }
+
         indice = THASH_h();
         tentativas++;
         fseek(arq, (sizeof(TA) * indice), SEEK_SET);
-        fread(registro, sizeof(TA), 1, arq);
+        TA_leitura(arq, registro);
     }
     printf("indice: %d; cpf: %lld; arq: %p ============================================\n", indice, registro->cpf, arq);
 
     if (tentativas >= TAM) {
         printf("Nao foi possivel escrever o registro, a hash esta cheia!\n");
+        free(registro);
+        fclose(arq);
+        return;
     }
 
     printf("[THASH_escreve] escrevendo!\n");
     fseek(arq, (sizeof(TA) * indice), SEEK_SET);
-    fwrite(aluno, sizeof(TA), 1, arq);
+    TA_escrita(arq, aluno);
     printf("[THASH_escreve] acabou com sucesso!\n");
+    free(registro);
     fclose(arq);
 }
 
@@ -91,10 +98,10 @@ void THASH_exclui(char *nomeArq, long long int cpf) {
     if ( indice == -1) {
         printf("Não foi possivel realizar a remoção!\n");
     } else {
-        FILE *arq = fopen(nomeArq, "rb");
+        FILE *arq = fopen(nomeArq, "rb+");
         TA *aluno = TA_inicializa();
         fseek(arq, (sizeof(TA) * indice), SEEK_SET);
-        fwrite(aluno, sizeof(TA), 1, arq);
+        TA_escrita(arq, aluno);
         fclose(arq);
     }
 }
@@ -115,7 +122,7 @@ void THASH_inicializa(char *nomeArq) {
     TA *aluno = TA_inicializa();
     TA_imprime(aluno);
     for (int i = 0; i < TAM; i++) {
-        fwrite(aluno, sizeof(TA), 1, arq);
+        TA_escrita(arq, aluno);
     }
     TA_libera(aluno);
     fclose(arq);

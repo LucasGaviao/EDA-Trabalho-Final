@@ -11,11 +11,11 @@ void teste_hash() {
         printf("não foi possivel acessar o arquivo!\n");
         exit(1);
     }
-    THASH_inicializa("hash.bin");
+    // THASH_inicializa("hash.bin");
 
     TA *aluno = TA_inicializa();
     TA *aluno_h = TA_inicializa();
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10000; i++) {
         TA_leitura(fonte, aluno);
         TA_imprime(aluno);
         printf("%lld", aluno->cpf);
