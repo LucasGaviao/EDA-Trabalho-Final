@@ -183,7 +183,6 @@ void THASH_constroi(char *nomeHash, char *nomeDados) {
         int indice;
         TA *registro = TA_inicializa();
 
-        // Buscar posição livre
         while (tentativas < TAM) {
             indice = THASH_h(aluno->cpf, tentativas++);
             fseek(hash, indice * sizeof(TA), SEEK_SET);
@@ -192,9 +191,9 @@ void THASH_constroi(char *nomeHash, char *nomeDados) {
             if (registro->cpf == -1) break; // Posição livre
         }
 
-        // Escrever aluno
         fseek(hash, indice * sizeof(TA), SEEK_SET);
         TA_escrita(hash, aluno);
+        free(registro);
     }
 
     TA_libera(aluno);
