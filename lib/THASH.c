@@ -110,7 +110,6 @@ void THASH_exclui(char *nomeArq, long long int cpf) {
             if (registro->cpf == cpf) {
                 printf("[THASH_exclui]Encontramos o Aluno! (cpf: %lld)\n", cpf);
                 free(registro);
-                fclose(arq);
                 achou = 1;
                 break;
             }
@@ -146,9 +145,8 @@ void THASH_leitura(char *nomeArq, long long int cpf, TA *aluno) {
 
             if (registro->cpf == cpf) {
                 printf("[THASH_busca]Encontramos o Aluno! (cpf: %lld)\n", cpf);
-                free(registro);
-                fclose(arq);
                 achou = 1;
+                break;
             }
         }
         if (achou) {
@@ -157,6 +155,8 @@ void THASH_leitura(char *nomeArq, long long int cpf, TA *aluno) {
         } else {
             printf("[THASH_busca]Não foi possivel encontrar o elemento!\n");
         }
+        free(registro);
+        fclose(arq);
     }
 }
 
@@ -166,7 +166,6 @@ void THASH_constroi(char *nomeHash, char *nomeDados) {
         printf("Erro ao abrir o %s!\n", nomeHash);
         exit(1);
     }
-
 
     FILE *dados = fopen(nomeDados, "rb");
     if (dados == NULL) {
@@ -178,13 +177,27 @@ void THASH_constroi(char *nomeHash, char *nomeDados) {
     for (int i = 0; i < TAM; i++) {
         TA_escrita(hash, aluno);
     }
-    fclose(hash);
-    int i = 0;
-    while (fread(aluno, sizeof(TA), 1, dados)==1 && !feof(dados) && i < 10000) {
-        i++;
-        THASH_escreve(nomeHash, aluno);
+
+    while (TA_leitura(dados, aluno)) {
+        int tentativas = 0;
+        int indice;
+        TA *registro = TA_inicializa();
+
+        // Buscar posição livre
+        while (tentativas < TAM) {
+            indice = THASH_h(aluno->cpf, tentativas++);
+            fseek(hash, indice * sizeof(TA), SEEK_SET);
+            TA_leitura(hash, registro);
+
+            if (registro->cpf == -1) break; // Posição livre
+        }
+
+        // Escrever aluno
+        fseek(hash, indice * sizeof(TA), SEEK_SET);
+        TA_escrita(hash, aluno);
     }
 
     TA_libera(aluno);
     fclose(dados);
+    fclose(hash);
 }

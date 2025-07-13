@@ -29,16 +29,14 @@ void TA_libera(TA *aluno) {
     free(aluno);
 }
 
-void TA_leitura(FILE *arq, TA *aluno) {
-    fread(aluno->nome, sizeof(char), 50, arq);
-    fread(&aluno->cpf, sizeof(long long int), 1, arq);
-    fread(&aluno->nota, sizeof(int), 1, arq);
+int TA_leitura(FILE *arq, TA *aluno) {
+    int flag = fread(aluno, sizeof(TA), 1, arq) == 1;
+    return flag;
 }
 
-void TA_escrita(FILE *arq, TA *aluno) {
-    fwrite(aluno->nome, sizeof(char), 50, arq);
-    fwrite(&aluno->cpf, sizeof(long long int), 1, arq);
-    fwrite(&aluno->nota, sizeof(int), 1, arq);
+int TA_escrita(FILE *arq, TA *aluno) {
+    int flag = fwrite(aluno, sizeof(TA), 1, arq) == 1;
+    return flag;
 }
 
 void TA_imprime(TA *aluno) {

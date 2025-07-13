@@ -43,7 +43,7 @@ int gerar_10k(char *nomeDados) {
         TA_set_nome(aluno, nome);
         TA_set_cpf(aluno, gerar_cpf());
         TA_set_nota(aluno, gerar_nota());
-        TA_escrita(arq, aluno);
+        if (TA_escrita(arq, aluno) != 1) exit(1);
     }
 
     TA_libera(aluno);
@@ -61,10 +61,12 @@ int ler_10k(char *nomeDados) {
     }
     TA *aluno = TA_inicializa();
     for (int i = 0; i < 10000; i++) {
-        TA_leitura(dados, aluno);
-        TA_imprime(aluno);
+        if (TA_leitura(dados, aluno) != 1) exit(1);
+        // TA_imprime(aluno);
     }
 
     free(aluno);
     fclose(dados);
+    printf("[ler_10k]Concluido com sucesso!\n");
+    return 1;
 }
