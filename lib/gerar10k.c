@@ -24,15 +24,15 @@ void atualiza_nome(char *nome, int num) {
     nome[50] = '\0';
 }
 
-int gerar_10k() {
+int gerar_10k(char *nomeDados) {
     printf("[gerar_10k]Iniciando operacao!\n");
     srand((unsigned long)time(NULL));
     char nome[] = "aluno00000000000000000000000000000000000000000000\0";
     TA *aluno = TA_inicializa();
 
-    FILE *arq = fopen("10kaluno.bin", "wb+");
+    FILE *arq = fopen(nomeDados, "wb+");
     if (!arq) {
-        printf("[gerar_10k]Nao foi possivel abrir o arquivo!\n");
+        printf("[gerar_10k]Nao foi possivel abrir o %s!\n", nomeDados);
         fclose(arq);
         return 0;
     }
@@ -50,4 +50,21 @@ int gerar_10k() {
     fclose(arq);
     printf("[gerar_10k]Operacao finalizada!\n");
     return 1;
+}
+
+int ler_10k(char *nomeDados) {
+    FILE *dados = fopen(nomeDados, "rb");
+    if (!dados) {
+        printf("[ler_10k]Nao foi possivel abrir o %s!\n", nomeDados);
+        fclose(dados);
+        return 0;
+    }
+    TA *aluno = TA_inicializa();
+    for (int i = 0; i < 10000; i++) {
+        TA_leitura(dados, aluno);
+        TA_imprime(aluno);
+    }
+
+    free(aluno);
+    fclose(dados);
 }

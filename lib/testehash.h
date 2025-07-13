@@ -7,6 +7,9 @@
 
 #include "THASH.h"
 
-void teste_hash();
+
+void teste_hash(char *nomeHash, char *nomeDados);
+void teste_cria_hash(char *nomeArq);
+int teste_ler_10k(char *nomeHash, char *nomeDados);
 
 #endif //TESTEHASH_H
