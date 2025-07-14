@@ -13,4 +13,6 @@ add_executable(EDA_Trabalho_Final main.c
         lib/gerar10k.c
         lib/gerar10k.h
         lib/testehash.c
-        lib/testehash.h)
+        lib/testehash.h
+        lib/THEAP.c
+        lib/THEAP.h)

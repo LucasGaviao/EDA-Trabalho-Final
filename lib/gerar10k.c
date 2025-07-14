@@ -3,6 +3,7 @@
 //
 
 #include "gerar10k.h"
+#define TAM_10K 10000
 
 int gerar_nota() {
     return abs(rand()) % 101;
@@ -24,13 +25,13 @@ void atualiza_nome(char *nome, int num) {
     nome[50] = '\0';
 }
 
-int gerar_10k(char *nomeDados) {
+int gerar_10k(char *nomeDados,long long int* all) {
     printf("[gerar_10k]Iniciando operacao!\n");
     srand((unsigned long)time(NULL));
     char nome[] = "aluno00000000000000000000000000000000000000000000\0";
     TA *aluno = TA_inicializa();
-
-    FILE *arq = fopen(nomeDados, "wb+");
+    int index = 0;
+    FILE *arq = fopen(nomeDados, "wb");
     if (!arq) {
         printf("[gerar_10k]Nao foi possivel abrir o %s!\n", nomeDados);
         fclose(arq);
@@ -38,14 +39,15 @@ int gerar_10k(char *nomeDados) {
     }
     printf("[gerar_10k]Foi possivel abrir o arquivo!\n");
 
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 0; i < TAM_10K; i++) {
         atualiza_nome(nome, i);
+        memset(aluno,0x00,sizeof(TA));
         TA_set_nome(aluno, nome);
         TA_set_cpf(aluno, gerar_cpf());
         TA_set_nota(aluno, gerar_nota());
         if (TA_escrita(arq, aluno) != 1) exit(1);
+        all[index++] = aluno->cpf;
     }
-
     TA_libera(aluno);
     fclose(arq);
     printf("[gerar_10k]Operacao finalizada!\n");
@@ -60,8 +62,11 @@ int ler_10k(char *nomeDados) {
         return 0;
     }
     TA *aluno = TA_inicializa();
-    for (int i = 0; i < 10000; i++) {
-        if (TA_leitura(dados, aluno) != 1) exit(1);
+    for (int i = 0; i < TAM_10K; i++) {
+        if (TA_leitura(dados, aluno) != 1) {
+            printf("[ler_10k] FALHOU!\n");
+            exit(1);
+        }
         // TA_imprime(aluno);
     }
 

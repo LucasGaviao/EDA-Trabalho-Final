@@ -6,6 +6,7 @@
 
 TA *TA_inicializa() {
     TA *novo = (TA *)malloc(sizeof(TA));
+    memset(novo,0x00,sizeof(TA));
     for (int i = 0; i < 49; i++) novo->nome[i] = '-';
     novo->nome[49] = '\0';
     novo->cpf = -1;
