@@ -28,6 +28,7 @@ void testeHeap(char *nomeHeap, char *nomeDados) {
         if (opcao == 1) {
             printf("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
             THEAP_constroi(nomeHeap, nomeDados, tam_heap);
+            printf("[testeHeap.case2] Heap construida em '%s'!\n", nomeHeap);
         } else if (opcao == 2) {
             printf("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
             printf("[testeHeap.case2]Digite o nome (ate 49 caracteres): ");

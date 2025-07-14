@@ -13,7 +13,8 @@
 int gerar_nota();
 long long int gerar_cpf ();
 void atualiza_nome(char *nome, int num);
-int gerar_10k(char *nomeDados, long long int* all);
+int gerar_10k(char *nomeDados);
 int ler_10k(char *nomeDados);
+void gerar_menu(char *nomeDados);
 
 #endif //GERAR10K_H

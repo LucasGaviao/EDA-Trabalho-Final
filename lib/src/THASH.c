@@ -8,7 +8,6 @@
 
 #define TAM_THASH 100000
 int THASH_h(long long int cpf, int k) {
-    srand(cpf/100);
     return (rand()%TAM_THASH + k ) % TAM_THASH;
 }
 
@@ -130,6 +129,7 @@ int THASH_leitura(char *nomeArq, long long int cpf, TA *aluno) {
     if (hash == NULL) {
         printf("[THASH_leitura]Nao foi possivel realizar leitura!\n");
     } else {
+        srand(cpf/100);
         TA reg;
         reg.cpf = -1;
         int indice = 0;
@@ -177,7 +177,9 @@ void THASH_constroi(char *nomeHash, char *nomeDados) {
         TA_escrita(hash, aluno);
     }
     int offs = 0;
+
     while (TA_leitura(dados, aluno)) {
+        srand(aluno->cpf/100);
         int tentativas = 0;
         int indice = 0;
         TA reg;

@@ -25,7 +25,7 @@ void atualiza_nome(char *nome, int num) {
     nome[50] = '\0';
 }
 
-int gerar_10k(char *nomeDados,long long int* all) {
+int gerar_10k(char *nomeDados) {
     printf("[gerar_10k]Iniciando operacao!\n");
     srand((unsigned long)time(NULL));
     char nome[] = "aluno00000000000000000000000000000000000000000000\0";
@@ -46,7 +46,6 @@ int gerar_10k(char *nomeDados,long long int* all) {
         TA_set_cpf(aluno, gerar_cpf());
         TA_set_nota(aluno, gerar_nota());
         if (TA_escrita(arq, aluno) != 1) exit(1);
-        all[index++] = aluno->cpf;
     }
     TA_libera(aluno);
     fclose(arq);
@@ -74,4 +73,22 @@ int ler_10k(char *nomeDados) {
     fclose(dados);
     printf("[ler_10k]Concluido com sucesso!\n");
     return 1;
+}
+
+void gerar_menu(char *nomeDados) {
+    int flag = 1;
+    int escolha;
+    while (flag) {
+        printf("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= MENU -=-=-=--=-=-=-=-=-=-=-=-=-=-=-\n Arquivo: '%s'\n", nomeDados);
+        printf(" 1- Gerar '%s'.\n Outro- Sair\n", nomeDados);
+        printf("ESCOLHA: ");
+        scanf("%d", &escolha);
+        if (escolha == 1) {
+            gerar_10k(nomeDados);
+            printf("[gerar_menu.case1] Arquivo '%s' gerado!\n", nomeDados);
+        } else {
+            flag = 0;
+            return;
+        }
+    }
 }

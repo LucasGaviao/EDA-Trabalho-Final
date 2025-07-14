@@ -52,7 +52,7 @@ void teste_hash(char *nomeHash, char *nomeDados) {
                 break;
             case 2:
                 printf("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
-                printf("[testeHash.case2]Digite o nome (até 49 caracteres): ");
+                printf("[testeHash.case2]Digite o nome (ate 49 caracteres): ");
 
                 int c;
                 while ((c = getchar()) != '\n' && c != EOF);
@@ -68,7 +68,7 @@ void teste_hash(char *nomeHash, char *nomeDados) {
                 strncpy(aluno->nome, nomeTemp, 49);
                 aluno->nome[49] = '\0';
 
-                printf("[testeHash.case2]Insira um CPF de 11 dígitos: ");
+                printf("[testeHash.case2]Insira um CPF de 11 digitos: ");
                 scanf("%lld", &aluno->cpf);
 
                 printf("[testeHash.case2]Insira uma nota (0 a 100): ");
@@ -79,7 +79,7 @@ void teste_hash(char *nomeHash, char *nomeDados) {
                 break;
             case 3:
                 printf("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
-                printf("[testeHash.case3]Insira um CPF de 11 dígitos: ");
+                printf("[testeHash.case3]Insira um CPF de 11 digitos: ");
                 scanf("%lld", &aluno->cpf);
 
                 indice = THASH_busca(nomeHash, aluno->cpf);
@@ -88,7 +88,7 @@ void teste_hash(char *nomeHash, char *nomeDados) {
                 if (hash == NULL) { printf("[testeHash.case3]Erro ao abrir o arquivo!\n"); exit(1);}
                 fseek(hash, sizeof(TA)*indice, SEEK_END);
                 TA_leitura(hash, aluno);
-                TA_imprime(aluno);
+                // TA_imprime(aluno);
                 if (aluno->cpf < 0) {
                     printf("[testeHash.case3] Aluno removido com sucesso!\n");
                     TA_imprime(aluno);
@@ -97,7 +97,7 @@ void teste_hash(char *nomeHash, char *nomeDados) {
                 break;
             case 4:
                 printf("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
-                printf("[testeHash.case4]Insira um CPF de 11 dígitos: ");
+                printf("[testeHash.case4]Insira um CPF de 11 digitos: ");
                 scanf("%lld", &aluno->cpf);
                 indice = THASH_busca(nomeHash, aluno->cpf);
                 if (indice < 0) {
@@ -108,9 +108,9 @@ void teste_hash(char *nomeHash, char *nomeDados) {
                 break;
             case 5:
                 printf("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
-                printf("Insira a quantidade de elementos: ");
+                printf("[testeHash.case5]Insira a quantidade de elementos: ");
                 scanf("%d", &x);
-                printf("Insira 1 para impressao e 0 caso contrario([1]impacta na performance): ");
+                printf("[testeHash.case5]Insira 1 para impressao e 0 caso contrario([1]impacta na performance): ");
                 scanf("%d", &imprimir);
                 teste_ler_X_alunos(nomeHash, nomeDados, x, imprimir);
                 break;
