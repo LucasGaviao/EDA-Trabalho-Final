@@ -1,210 +1,229 @@
-//
-// Created by lucas on 13/07/2025.
-//
+// THEAP.c
 
 #include "../hdr/THEAP.h"
+#include <string.h> // Para memset
 
-#define aluno_size 10000
+#define NUM_ALUNOS 10000
 
-int THEAP_pai(int i){
+
+int THEAP_pai(int i) {
     if (i <= 0) return -1;
-    return (i - 1)/2;
+    return (i - 1) / 2;
 }
 
-int THEAP_filho_e(int i){
-    return 2*i + 1;
+int THEAP_filho_e(int i) {
+    return 2 * i + 1;
 }
 
-int THEAP_filho_d(int i){
-    return 2*i + 2;
+int THEAP_filho_d(int i) {
+    return 2 * i + 2;
 }
 
-void THEAP_subir(char *nomeHeap, int indice){
-    FILE *heap = fopen(nomeHeap, "rb+");
-    if (!heap) {
-        printf("Erro ao tentar subir. Arquivo inválido.\n");
-        exit(1);
-    }
+// --- Funções de Manutenção (com I/O abstraído) ---
 
-    TA filho;
-    fseek(heap, (sizeof(TA) * indice), SEEK_SET);
-    TA_leitura(heap, &filho);
-
+void THEAP_subir(FILE *heap, int indice, long int *tam_heap) {
+    if (indice <= 0) return;
     int pai_indice = THEAP_pai(indice);
-    if(pai_indice >= 0){
-        TA pai;
-        fseek(heap, (sizeof(TA) * pai_indice), SEEK_SET);
-        TA_leitura(heap, &pai);
+    TA filho, pai;
 
-        if(filho.nota >= pai.nota){
-            fseek(heap, (sizeof(TA) * pai_indice), SEEK_SET);
-            TA_escrita(heap, &filho);
-            fflush(heap);
 
-            fseek(heap, (sizeof(TA) * indice), SEEK_SET);
-            TA_escrita(heap, &pai);
-            fflush(heap);
+    fseek(heap, indice * sizeof(TA), SEEK_SET);
+    TA_leitura(heap, &filho); // Substituído fread
 
-            fclose(heap);
-            THEAP_subir(nomeHeap, pai_indice);
-        }
+
+    fseek(heap, pai_indice * sizeof(TA), SEEK_SET);
+    TA_leitura(heap, &pai); // Substituído fread
+
+
+    if (filho.nota >= pai.nota) {
+
+        fseek(heap, pai_indice * sizeof(TA), SEEK_SET);
+        TA_escrita(heap, &filho); // Substituído fwrite
+
+        fseek(heap, indice * sizeof(TA), SEEK_SET);
+        TA_escrita(heap, &pai); // Substituído fwrite
+
+        fflush(heap);
+        THEAP_subir(heap, pai_indice, tam_heap);
     }
-    fclose(heap);
 }
 
-void THEAP_descer(char *nomeHeap, int pai_indice, int heap_tam){
-    FILE *heap = fopen(nomeHeap, "rb+");
-    if (!heap) {
-        printf("Erro ao tentar descer. Arquivo inválido.\n");
-        exit(1);
-    }
-    rewind(heap);
+void THEAP_descer(FILE *heap, int indice, long int *tam_heap) {
+    int filho_e_indice = THEAP_filho_e(indice);
+    int filho_d_indice = THEAP_filho_d(indice);
+    int maior_indice = indice;
 
-    TA pai;
-    fseek(heap, (sizeof(TA) * pai_indice), SEEK_SET);
+    TA pai, filho_e, filho_d, temp;
+
+
+    fseek(heap, indice * sizeof(TA), SEEK_SET);
     TA_leitura(heap, &pai);
 
-    TA filho_d;
-    int filho_d_indice = THEAP_filho_d(pai_indice);
-    if(filho_d_indice){
-        fseek(heap, (sizeof(TA) * filho_d_indice), SEEK_SET);
-        TA_leitura(heap, &filho_d);
-    }
-
-    TA filho_e;
-    int filho_f_indice = THEAP_filho_e(pai_indice);
-    if(filho_f_indice < heap_tam){
-        fseek(heap, (sizeof(TA) * filho_f_indice), SEEK_SET);
+    if (filho_e_indice < *tam_heap) {
+        fseek(heap, filho_e_indice * sizeof(TA), SEEK_SET);
         TA_leitura(heap, &filho_e);
-    }
-
-    if(pai.nota < filho_d.nota && filho_d.nota >= filho_e.nota){
-        fseek(heap, (sizeof(TA) * pai_indice), SEEK_SET);
-        fwrite(&filho_d, sizeof(TA), 1, heap);
-        fseek(heap, (sizeof(TA) * filho_d_indice), SEEK_SET);
-        fwrite(&pai, sizeof(TA), 1, heap);
-
-        fclose(heap);
-        THEAP_descer(heap, filho_d_indice, heap_tam);
-    } else if(pai.nota < filho_e.nota && filho_e.nota > filho_d.nota){
-        fseek(heap, (sizeof(TA) * pai_indice), SEEK_SET);
-        fwrite(&filho_e, sizeof(TA), 1, heap);
-        fseek(heap, (sizeof(TA) * filho_f_indice), SEEK_SET);
-        fwrite(&pai, sizeof(TA), 1, heap);
-
-        fclose(heap);
-        THEAP_descer(heap, filho_f_indice, heap_tam);
-    }
-}
-
-int THEAP_busca(char *nomeHeap, long long int cpf){
-    FILE *arq = fopen(nomeHeap, "rb+");
-    if (!arq) {
-        printf("Erro na busca. Não foi possível abrir o arquivo.\n");
-        return -1;
-    }
-    rewind(arq);
-
-    TA target;
-
-    fseek(arq, 0, SEEK_END);
-    long heap_tam = ftell(arq)/sizeof(TA);
-
-    if(heap_tam < 0){
-        printf("Erro na busca. Heap vazia ou inexistente.\n");
-        return -1;
-    }
-    for(int i = 0; i < heap_tam; i++){
-        fseek(arq, sizeof(TA) * i, SEEK_SET);
-        TA_leitura(arq, &target);
-        if(target.cpf == cpf){
-            return i;
+        if (filho_e.nota > pai.nota) {
+            maior_indice = filho_e_indice;
         }
     }
 
-    printf("Erro na busca. Estudante inexistente.\n");
-    return -1;
+    if (filho_d_indice < *tam_heap) {
+        TA maior_atual;
+        fseek(heap, maior_indice * sizeof(TA), SEEK_SET);
+        TA_leitura(heap, &maior_atual);
+
+        fseek(heap, filho_d_indice * sizeof(TA), SEEK_SET);
+        TA_leitura(heap, &filho_d);
+
+        if (filho_d.nota > maior_atual.nota) {
+            maior_indice = filho_d_indice;
+        }
+    }
+
+    if (maior_indice != indice) {
+        fseek(heap, maior_indice * sizeof(TA), SEEK_SET);
+        TA_leitura(heap, &temp);
+
+        fseek(heap, indice * sizeof(TA), SEEK_SET);
+        TA_escrita(heap, &temp);
+
+        fseek(heap, maior_indice * sizeof(TA), SEEK_SET);
+        TA_escrita(heap, &pai);
+
+        THEAP_descer(heap, maior_indice, tam_heap);
+    }
 }
 
-void THEAP_insere(char *nomeHeap, TA aluno, int heap_tam){
+void THEAP_escreve(char *nomeHeap, TA *aluno, long int *tam_heap) {
     FILE *heap = fopen(nomeHeap, "rb+");
     if (!heap) {
         printf("Erro na inserção. Não foi possível abrir o arquivo.\n");
         return;
     }
-    rewind(heap);
+    fseek(heap, (*tam_heap) * sizeof(TA), SEEK_SET);
+    TA_escrita(heap, aluno);
 
-    fseek(heap, 0, SEEK_END);
-    fwrite(&aluno, sizeof(TA), 1, heap);
+    (*tam_heap)++;
+    THEAP_subir(heap, *tam_heap-1, tam_heap);
 
-    if(heap_tam == -1) heap_tam = ftell(heap)/sizeof(TA);
     fclose(heap);
-    THEAP_subir(heap, heap_tam);
 }
 
-void THEAP_remove(char *nomeHeap, long long int cpf){
-    FILE *arq = fopen(nomeHeap, "rb+");
-    if (!arq) {
+void THEAP_exclui(char *nomeHeap, long int *tam_heap) {
+    FILE *heap = fopen(nomeHeap, "rb+");
+    if (!heap) {
         printf("Erro na remoção. Não foi possível abrir o arquivo.\n");
         return;
     }
-    fseek(arq, sizeof(TA), SEEK_SET);
 
-}
-
-int THEAP_verifica(char *nomeHeap) {
-    FILE *arq = fopen(nomeHeap, "rb+");
-    if (!arq) return 0;
-
-    fseek(arq, 0, SEEK_END);
-    long size = ftell(arq) / sizeof(TA);
-
-    for (int i = 0; i < size; i++) {
-        TA pai, filho_e, filho_d;
-        fseek(arq, sizeof(TA) * i, SEEK_SET);
-        TA_leitura(arq, &pai);
-
-        int filho_e_indice = THEAP_filho_e(i);
-        int filho_d_indice = THEAP_filho_d(i);
-
-        if (filho_e_indice < size) {
-            fseek(arq, sizeof(TA) * filho_e_indice, SEEK_SET);
-            TA_leitura(arq, &filho_e);
-            if (filho_e.nota > pai.nota) {
-                printf("Erro: filho esquerdo maior que pai na pos %d\n", i);
-                return 0;
-            }
-        }
-
-        if (filho_d_indice < size) {
-            fseek(arq, sizeof(TA) * filho_d_indice, SEEK_SET);
-            TA_leitura(arq, &filho_d);
-            if (filho_d.nota > pai.nota) {
-                printf("Erro: filho direito maior que pai na pos %d\n", i);
-                return 0;
-            }
-        }
-    }
-    return 1;
-}
-
-void THEAP_constroi(char *nomeHeap, char *nomeDados){
-    // FILE *arq_heap = fopen(nomeHeap, "rb+");
-    // if (!arq_heap) {
-    //     printf("Erro na criação. Arquivo da hash inválido.\n");
-    //     return;
-    // }
-    FILE *arq_alunos = fopen(nomeDados, "rb+");
-    if (!arq_alunos) {
-        printf("Erro na criação. Arquivo dos nomes inválido.\n");
+    if (*tam_heap == 0) {
+        fclose(heap);
         return;
     }
 
-    TA aluno;
-    for(int i = 0; i < aluno_size; i++){
-        TA_leitura(arq_alunos, &aluno);
-        THEAP_insere(nomeHeap, aluno, i);
+    // ler primeiro elemento para o print
+    fseek(heap, 0, SEEK_SET);
+    TA removido;
+    TA_leitura(heap, &removido);
+    TA_imprime(&removido);
+
+    // Remoção
+    TA ultimo_aluno;
+    fseek(heap, (*tam_heap -1) * sizeof(TA), SEEK_SET);
+    TA_leitura(heap, &ultimo_aluno);
+
+    fseek(heap, 0, SEEK_SET);
+    TA_escrita(heap, &ultimo_aluno);
+
+    (*tam_heap)--;
+    THEAP_descer(heap, 0, tam_heap);
+
+    fclose(heap);
+    printf("Aluno: %s, nota:%d, cpf:%lld, indice:%d. REMOVIDO!\n",removido.nome, removido.nota, removido.cpf, 0);
+}
+
+TA* THEAP_busca(char *nomeHeap, long long int cpf, long int *tam_heap) {
+    FILE *heap = fopen(nomeHeap, "rb");
+    if (!heap) {
+        return NULL;
     }
 
-    int a = THEAP_verifica(nomeHeap);
+    TA *aluno = TA_inicializa();
+    int contador = 0;
+    while(TA_leitura(heap, aluno) == 1 && contador < *tam_heap) {
+        if (aluno->cpf == cpf) {
+            fclose(heap);
+            return aluno;
+        }
+    }
+
+    free(aluno);
+    fclose(heap);
+    return NULL;
+}
+
+
+void THEAP_constroi(char *nomeHeap, char *nomeDados, long int *tam_heap) {
+    FILE *dados = fopen(nomeDados, "rb");
+    if (!dados) return;
+
+    FILE *heap = fopen(nomeHeap, "wb+");
+    if (!heap) {
+        fclose(dados);
+        return;
+    }
+
+    TA aluno_temp;
+    while(TA_leitura(dados, &aluno_temp) == 1) {
+        TA_escrita(heap, &aluno_temp);
+    }
+    fclose(dados);
+
+    fseek(heap, 0, SEEK_END);
+    (*tam_heap) = ftell(heap) / sizeof(TA);
+    for (int i = (*tam_heap / 2) - 1; i >= 0; i--) {
+        THEAP_descer(heap, i, tam_heap);
+    }
+
+    fclose(heap);
+}
+
+
+int THEAP_verifica(char *nomeHeap) {
+    FILE *heap = fopen(nomeHeap, "rb");
+    if (!heap) return 0;
+
+    fseek(heap, 0, SEEK_END);
+    long size = ftell(heap) / sizeof(TA);
+    rewind(heap);
+
+    for (int i = 0; i < size; i++) {
+        TA pai, filho_e, filho_d;
+        fseek(heap, i * sizeof(TA), SEEK_SET);
+        TA_leitura(heap, &pai);
+
+        int filho_e_idx = THEAP_filho_e(i);
+        if (filho_e_idx < size) {
+            fseek(heap, filho_e_idx * sizeof(TA), SEEK_SET);
+            TA_leitura(heap, &filho_e);
+            if (filho_e.nota > pai.nota) {
+                printf("Erro de Max-Heap: Pai na pos %d (nota %d) < Filho esquerdo (nota %d)\n", i, pai.nota, filho_e.nota);
+                fclose(heap);
+                return 0;
+            }
+        }
+
+        int filho_d_idx = THEAP_filho_d(i);
+        if (filho_d_idx < size) {
+            fseek(heap, filho_d_idx * sizeof(TA), SEEK_SET);
+            TA_leitura(heap, &filho_d);
+            if (filho_d.nota > pai.nota) {
+                printf("Erro de Max-Heap: Pai na pos %d (nota %d) < Filho direito (nota %d)\n", i, pai.nota, filho_d.nota);
+                fclose(heap);
+                return 0;
+            }
+        }
+    }
+    fclose(heap);
+    return 1;
 }

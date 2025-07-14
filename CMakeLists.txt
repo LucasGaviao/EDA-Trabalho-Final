@@ -15,4 +15,7 @@ add_executable(EDA_Trabalho_Final main.c
         lib/src/testehash.c
         lib/hdr/testehash.h
         lib/src/THEAP.c
-        lib/hdr/THEAP.h)
+        lib/hdr/THEAP.h
+        lib/src/testeHeap.c
+        lib/hdr/testeHeap.h
+)
