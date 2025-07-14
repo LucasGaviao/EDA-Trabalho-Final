@@ -1,4 +1,4 @@
-// TABM.h (Refatorado)
+// TABM.h
 
 #ifndef TABM_H
 #define TABM_H
@@ -6,40 +6,34 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "TA.h" // Usando a estrutura de Aluno já existente
+#include "TA.h" // PADRONIZAÇÃO: Usando a estrutura de Aluno padrão do projeto
 
-#define TAM_TABM 100 // Ordem da árvore
+#define TAM 100 // Ordem da árvore (usando um nome mais claro)
 
-// Cabeçalho do arquivo de índice para guardar metadados
+// PADRONIZAÇÃO: Cabeçalho para gerenciar o estado do arquivo de índice
 typedef struct {
     long long endereco_raiz;
     long long proximo_endereco_livre;
 } Cabecalho;
 
-// Estrutura do nó da Árvore-B
+// PADRONIZAÇÃO: Estrutura do nó renomeada para TABM e com chave long long int
 typedef struct {
     int eh_folha;
     int num_chaves;
-    long long int chaves[TAM_TABM * 2 - 1];
-    long long filhos[TAM_TABM * 2];
-    long long endereco;
-    long long reg[TAM_TABM * 2 - 1];
-    long long proximo_no;
+    long long int ponteiro_pai;
+    long long int chaves[TAM * 2];
+    long long int filhos[TAM * 2 + 1];
+    long long int endereco;
+    long long int reg[TAM * 2];
+    long long int proximo_no;
 } TABM;
 
-// --- Protótipos das Funções Públicas ---
 
-// Funções de manipulação do arquivo e nós (internas, mas úteis para depuração)
-void TABM_ler_no(const char* arq_idx, long long endereco, TABM* no);
-void TABM_escrever_no(const char* arq_idx, TABM* no);
-
-// Funções principais da Árvore-B (a verdadeira API pública)
-void TABM_inicializa(const char* arq_idx_nome);
-void TABM_insere(const char* arq_idx_nome, const char* arq_dados_nome, TA* aluno);
-void TABM_remove(const char* arq_idx_nome, long long int cpf);
-long long TABM_busca_cpf(const char* arq_idx_nome, long long int cpf);
-
-// Os protótipos das funções recursivas e de divisão foram removidos
-// por serem detalhes de implementação interna do módulo.
+void TARVBP_reseta_contador_nos();
+long long TARVBP_insere(long long int endereco_raiz, TA* d, const char* nome_tabm_indices, const char* nome_tabm_dados);
+long long busca_cpf(const char* nome_tabm_indices, long long int cpf, long long int endereco_raiz);
+long long TARVBP_remove(long long int endereco_raiz, long long int cpf, const char* nome_tabm_indices);
+void buscar_e_imprimir_dados(long long int endereco_raiz, long long int cpf_busca, const char* nome_tabm_indices, const char* arq_dados_nome);
+long long constroi_arvore(const char* nome_alunos_dados, const char* nome_tabm_indices, const char* nome_tabm_dados);
 
 #endif //TABM_H
