@@ -2,7 +2,7 @@
 // Created by Pichau on 11/07/2025.
 //
 
-#include "TA.h"
+#include "../hdr/TA.h"
 
 TA *TA_inicializa() {
     TA *novo = (TA *)malloc(sizeof(TA));

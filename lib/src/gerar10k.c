@@ -2,7 +2,7 @@
 // Created by Pichau on 11/07/2025.
 //
 
-#include "gerar10k.h"
+#include "../hdr/gerar10k.h"
 #define TAM_10K 10000
 
 int gerar_nota() {

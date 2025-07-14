@@ -4,15 +4,15 @@ project(EDA_Trabalho_Final C)
 set(CMAKE_C_STANDARD 99)
 
 add_executable(EDA_Trabalho_Final main.c
-        lib/TA.c
-        lib/TA.h
-        lib/TABM.c
-        lib/TABM.h
-        lib/THASH.c
-        lib/THASH.h
-        lib/gerar10k.c
-        lib/gerar10k.h
-        lib/testehash.c
-        lib/testehash.h
-        lib/THEAP.c
-        lib/THEAP.h)
+        lib/src/TA.c
+        lib/hdr/TA.h
+        lib/src/TABM.c
+        lib/hdr/TABM.h
+        lib/src/THASH.c
+        lib/hdr/THASH.h
+        lib/src/gerar10k.c
+        lib/hdr/gerar10k.h
+        lib/src/testehash.c
+        lib/hdr/testehash.h
+        lib/src/THEAP.c
+        lib/hdr/THEAP.h)

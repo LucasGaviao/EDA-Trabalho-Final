@@ -2,7 +2,7 @@
 // Created by Pichau on 11/07/2025.
 //
 
-#include "THASH.h"
+#include "../hdr/THASH.h"
 
 #include <stdlib.h>
 
@@ -13,8 +13,8 @@ int THASH_h(long long int cpf, int k) {
 }
 
 void THASH_escreve(char *nomeArq, TA *aluno) {
-    FILE *arq = fopen(nomeArq, "rb+"); // abre para leitura e escrita sem apagar os dados
-    if (!arq) {
+    FILE *hash = fopen(nomeArq, "rb+"); // abre para leitura e escrita sem apagar os dados
+    if (!hash) {
         printf("[THASH_escreve]Erro ao abrir o arquivo '%s'!\n", nomeArq);
         exit(1);
     }
@@ -29,12 +29,12 @@ void THASH_escreve(char *nomeArq, TA *aluno) {
     while (tentativas < TAM_THASH) {
         indice = THASH_h(aluno->cpf, tentativas);
         tentativas++;
-        fseek(arq, (sizeof(TA) * indice), SEEK_SET);
-        TA_leitura(arq, registro);
+        fseek(hash, (sizeof(TA) * indice), SEEK_SET);
+        TA_leitura(hash, registro);
 
         if (registro->cpf == aluno->cpf) {
             printf("[THASH_escreve]Aluno ja esta na tabela!\n");
-            fclose(arq);
+            fclose(hash);
             return;
         }
 
@@ -46,21 +46,21 @@ void THASH_escreve(char *nomeArq, TA *aluno) {
     if (tentativas >= TAM_THASH) {
         printf("[THASH_escreve]Nao foi possivel escrever o registro, a hash esta cheia!(colisoes: %d)\n", tentativas);
         free(registro);
-        fclose(arq);
+        fclose(hash);
         return;
     }
 
-    fseek(arq, (sizeof(TA) * indice), SEEK_SET);
-    TA_escrita(arq, aluno);
+    fseek(hash, (sizeof(TA) * indice), SEEK_SET);
+    TA_escrita(hash, aluno);
     printf("[THASH_escreve]Escrito com sucesso! (indice: %d, colisoes: %d)\n", indice, tentativas);
     free(registro);
-    fclose(arq);
+    fclose(hash);
 }
 
 int THASH_busca(char *nomeArq, long long int cpf) {
     /* Retorna -1 caso não funcione ou não ache. Retorna o endereço para leitura do aluno caso ache.*/
-    FILE *arq = fopen(nomeArq, "rb");
-    if (!arq) {
+    FILE *hash = fopen(nomeArq, "rb");
+    if (!hash) {
         printf("[THASH_busca]Erro ao abrir o arquivo '%s'!\n", nomeArq);
         return -1;
     }
@@ -73,17 +73,17 @@ int THASH_busca(char *nomeArq, long long int cpf) {
     while (tentativas < TAM_THASH) {
         indice = THASH_h(cpf, tentativas);
         tentativas++;
-        fseek(arq, (sizeof(TA) * indice), SEEK_SET);
-        TA_leitura(arq, registro);
+        fseek(hash, (sizeof(TA) * indice), SEEK_SET);
+        TA_leitura(hash, registro);
 
         if (registro->cpf == cpf) {
             printf("[THASH_busca]Encontramos o Aluno! (cpf: %lld)\n", cpf);
             free(registro);
-            fclose(arq);
+            fclose(hash);
             return indice;
         }
     }
-    fclose(arq);
+    fclose(hash);
 
     printf("[THASH_busca]Nao foi possivel encontrar o aluno!\n");
     free(registro);
@@ -91,8 +91,8 @@ int THASH_busca(char *nomeArq, long long int cpf) {
 }
 
 void THASH_exclui(char *nomeArq, long long int cpf) {
-    FILE *arq = fopen(nomeArq, "rb+");
-    if (arq == NULL) {
+    FILE *hash = fopen(nomeArq, "rb+");
+    if (hash == NULL) {
         printf("[THASH_exclui]Nao foi possivel realizar a remoção!\n");
     } else{
         srand(cpf/100);
@@ -104,8 +104,8 @@ void THASH_exclui(char *nomeArq, long long int cpf) {
         while (tentativas < TAM_THASH) {
             indice = THASH_h(cpf, tentativas);
             tentativas++;
-            fseek(arq, (sizeof(TA) * indice), SEEK_SET);
-            TA_leitura(arq, registro);
+            fseek(hash, (sizeof(TA) * indice), SEEK_SET);
+            TA_leitura(hash, registro);
 
             if (registro->cpf == cpf) {
                 printf("[THASH_exclui]Encontramos o Aluno! (cpf: %lld)\n", cpf);
@@ -116,18 +116,18 @@ void THASH_exclui(char *nomeArq, long long int cpf) {
         }
         if (achou) {
             TA *aluno = TA_inicializa();
-            fseek(arq, (sizeof(TA) * indice), SEEK_SET);
-            TA_escrita(arq, aluno);
+            fseek(hash, (sizeof(TA) * indice), SEEK_SET);
+            TA_escrita(hash, aluno);
         }else {
             printf("[THASH_exclui]Não foi possivel encontrar o elemento!\n");
         }
-        fclose(arq);
+        fclose(hash);
     }
 }
 
 int THASH_leitura(char *nomeArq, long long int cpf, TA *aluno) {
-    FILE *arq = fopen(nomeArq, "rb");
-    if (arq == NULL) {
+    FILE *hash = fopen(nomeArq, "rb");
+    if (hash == NULL) {
         printf("[THASH_leitura]Nao foi possivel realizar leitura!\n");
     } else {
         TA reg;
@@ -137,8 +137,9 @@ int THASH_leitura(char *nomeArq, long long int cpf, TA *aluno) {
         int achou = 0;
         while (tentativas < TAM_THASH) {
             indice = THASH_h(cpf, tentativas++);
-            fseek(arq, (sizeof(TA) * indice), SEEK_SET);
-            fread(&reg, sizeof(TA),1,arq);
+            fseek(hash, (sizeof(TA) * indice), SEEK_SET);
+            // fread(&reg, sizeof(TA),1,arq);
+            TA_leitura(hash, &reg);
             if (reg.cpf == cpf) {
                 //printf("[THASH_busca]Encontramos o Aluno! (cpf: %lld)\n", cpf);
                 achou = 1;
@@ -146,14 +147,14 @@ int THASH_leitura(char *nomeArq, long long int cpf, TA *aluno) {
             }
         }
         if (achou) {
-            fseek(arq, sizeof(TA) * indice, SEEK_SET);
-            TA_leitura(arq, aluno);
+            fseek(hash, sizeof(TA) * indice, SEEK_SET);
+            TA_leitura(hash, aluno);
         } else {
             //printf("[THASH_busca]Não foi possivel encontrar o elemento!\n");
-            fclose(arq);
+            fclose(hash);
             return 0;
         }
-        fclose(arq);
+        fclose(hash);
     }
     return 1;
 }
@@ -176,7 +177,7 @@ void THASH_constroi(char *nomeHash, char *nomeDados) {
         TA_escrita(hash, aluno);
     }
     int offs = 0;
-    while (fread(aluno,sizeof(TA),1,dados)) {
+    while (TA_leitura(dados, aluno)) {
         int tentativas = 0;
         int indice = 0;
         TA reg;
@@ -186,7 +187,8 @@ void THASH_constroi(char *nomeHash, char *nomeDados) {
         while (tentativas < TAM_THASH) {
             indice = THASH_h(aluno->cpf, tentativas++);
             fseek(hash, indice * sizeof(TA), SEEK_SET);
-            fread(&reg, sizeof(TA),1,hash);
+            // fread(&reg, sizeof(TA),1,hash);
+            TA_leitura(hash, &reg);
             if (reg.cpf == aluno->cpf) {
                 printf("aluno ja na hash! (cpf:%lld)\n", reg.cpf);
                 break;
@@ -201,7 +203,8 @@ void THASH_constroi(char *nomeHash, char *nomeDados) {
         }
         if (reg.cpf == aluno->cpf)continue;
         fseek(hash, indice * sizeof(TA), SEEK_SET);
-        fwrite(aluno, sizeof(TA),1,hash);
+        // fwrite(aluno, sizeof(TA),1,hash);
+        TA_escrita(hash, aluno);
     }
     TA_libera(aluno);
     fclose(dados);

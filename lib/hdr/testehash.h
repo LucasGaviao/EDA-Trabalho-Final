@@ -5,7 +5,7 @@
 #ifndef TESTEHASH_H
 #define TESTEHASH_H
 
-#include "THASH.h"
+#include "../hdr/THASH.h"
 
 
 void teste_hash(char *nomeHash, char *nomeDados);

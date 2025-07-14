@@ -7,9 +7,9 @@
 
 #include "TA.h"
 int THASH_h(long long int cpf, int k);
-int THASH_ocupado(FILE *arq);
 int THASH_busca(char *nomeArq, long long int cpf);
 void THASH_escreve(char *nomeArq, TA *aluno);
 int THASH_leitura(char *nomeArq, long long int cpf, TA *aluno);
+void THASH_exclui(char *nomeArq, long long int cpf);
 void THASH_constroi(char *nomeHash, char *nomeDados);
 #endif //THASH_H
