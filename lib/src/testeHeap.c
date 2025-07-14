@@ -6,7 +6,7 @@
 
 
 void testeHeap(char *nomeHeap, char *nomeDados) {
-    printf("-=-=-=-=-=-=-=-=-= MENU =-=-=-=-=-=-=-=-=-\nArquivos: - Heap('%s') - Dados('%s')\n 1- Construir Heap.\n 2- Inserir Aluno.\n 3- Remover Aluno.\n 4- Buscar Aluno.\n OUTRO- Sair\n", nomeHeap, nomeDados);
+    printf("-=-=-=-=-=-=-=-=-= MENU =-=-=-=-=-=-=-=-=-\nArquivos: - Heap('%s') - Dados('%s')\n 1- Construir Heap.\n 2- Inserir Aluno.\n 3- Remover Aluno.\n 4- Buscar Aluno.\n 5- Verifica estrutura\n OUTRO- Sair\n", nomeHeap, nomeDados);
     long int valor = -1;
     long int *tam_heap = &valor;
 
@@ -20,6 +20,7 @@ void testeHeap(char *nomeHeap, char *nomeDados) {
     TA *aluno = TA_inicializa();
     TA *aluno2 = TA_inicializa();
     while ((1 <= opcao) && (opcao < 6)) {
+        printf("Tamanho atual: %ld\n", *tam_heap);
         printf("ESCOLHA: ");
         scanf("%d", &opcao);
         if (opcao == 1) {
@@ -77,7 +78,7 @@ void testeHeap(char *nomeHeap, char *nomeDados) {
             THEAP_guarda_tam(tam_heap);
             return;
         }
-        printf("-=-=-=-=-=-=-=-=-= MENU =-=-=-=-=-=-=-=-=-\nArquivos: - Heap('%s') - Dados('%s')\n 1- Construir Heap.\n 2- Inserir Aluno.\n 3- Remover Aluno.\n 4- Buscar Aluno.\n OUTRO- Sair\n", nomeHeap, nomeDados);
+        printf("-=-=-=-=-=-=-=-=-= MENU =-=-=-=-=-=-=-=-=-\nArquivos: - Heap('%s') - Dados('%s')\n 1- Construir Heap.\n 2- Inserir Aluno.\n 3- Remover Aluno.\n 4- Buscar Aluno.\n 5- Verifica estrutura\n OUTRO- Sair\n", nomeHeap, nomeDados);
     }
 
 }
