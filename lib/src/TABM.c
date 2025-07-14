@@ -1,6 +1,9 @@
 // TABM.c
 
 #include "../hdr/TABM.h"
+static void TABM_insere_recursivo(TABM* no, TA* aluno, const char* arq_idx, const char* arq_dados, Cabecalho* cab);
+static void TABM_divisao(TABM* pai, int i_filho, TABM* filho, const char* arq_idx, Cabecalho* cab);
+static TABM TABM_criar_no(Cabecalho* cab);
 
 // --- Funções Auxiliares de I/O ---
 
@@ -144,35 +147,56 @@ void TABM_insere_recursivo(TABM* no, TA* aluno, const char* arq_idx, const char*
 void TABM_divisao(TABM* pai, int i_filho, TABM* filho, const char* arq_idx, Cabecalho* cab) {
     TABM novo_irmao = TABM_criar_no(cab);
     novo_irmao.eh_folha = filho->eh_folha;
-    novo_irmao.num_chaves = TAM_TABM - 1;
 
-    for (int j = 0; j < TAM_TABM - 1; j++) {
-        novo_irmao.chaves[j] = filho->chaves[j + TAM_TABM]; // Cópia de long long int
-        novo_irmao.reg[j] = filho->reg[j + TAM_TABM];
-    }
-    if (!filho->eh_folha) {
+    // Move a metade direita das chaves do nó cheio (filho) para o novo nó (novo_irmao)
+    if (filho->eh_folha) {
+        novo_irmao.num_chaves = TAM_TABM; // A nova folha recebe uma chave a mais
+        filho->num_chaves = TAM_TABM - 1;
+
+        for (int j = 0; j < TAM_TABM; j++) {
+            novo_irmao.chaves[j] = filho->chaves[j + TAM_TABM - 1];
+            novo_irmao.reg[j] = filho->reg[j + TAM_TABM - 1];
+        }
+
+        // Ajusta a lista encadeada de folhas
+        novo_irmao.proximo_no = filho->proximo_no;
+        filho->proximo_no = novo_irmao.endereco;
+
+    } else { // Se for um nó interno
+        novo_irmao.num_chaves = TAM_TABM - 1;
+        filho->num_chaves = TAM_TABM - 1;
+
+        for (int j = 0; j < TAM_TABM - 1; j++) {
+            novo_irmao.chaves[j] = filho->chaves[j + TAM_TABM];
+        }
         for (int j = 0; j < TAM_TABM; j++) {
             novo_irmao.filhos[j] = filho->filhos[j + TAM_TABM];
         }
-    } else {
-        // Se for B+ (folhas encadeadas)
-        novo_irmao.proximo_no = filho->proximo_no;
-        filho->proximo_no = novo_irmao.endereco;
     }
 
-    filho->num_chaves = TAM_TABM - 1;
-
+    // Desloca os filhos do pai para abrir espaço para o novo nó
     for (int j = pai->num_chaves; j > i_filho; j--) {
         pai->filhos[j + 1] = pai->filhos[j];
     }
     pai->filhos[i_filho + 1] = novo_irmao.endereco;
 
+    // Desloca as chaves do pai para abrir espaço para a nova chave
     for (int j = pai->num_chaves - 1; j >= i_filho; j--) {
-        pai->chaves[j + 1] = pai->chaves[j]; // Cópia de long long int
+        pai->chaves[j + 1] = pai->chaves[j];
     }
-    pai->chaves[i_filho] = filho->chaves[TAM_TABM - 1];
+
+    // Promove a chave correta para o pai
+    if (filho->eh_folha) {
+        // Para folhas, a primeira chave do novo irmão é COPIADA para o pai [cite: 95, 133]
+        pai->chaves[i_filho] = novo_irmao.chaves[0];
+    } else {
+        // Para nós internos, a chave do meio SOBE e é removida do filho [cite: 99]
+        pai->chaves[i_filho] = filho->chaves[TAM_TABM - 1];
+    }
+
     pai->num_chaves++;
 
+    // Salva todas as alterações no disco
     TABM_escrever_no(arq_idx, pai);
     TABM_escrever_no(arq_idx, filho);
     TABM_escrever_no(arq_idx, &novo_irmao);
@@ -180,46 +204,98 @@ void TABM_divisao(TABM* pai, int i_filho, TABM* filho, const char* arq_idx, Cabe
 
 long long TABM_busca_cpf(const char* arq_idx_nome, long long int cpf) {
     FILE* arq_idx = fopen(arq_idx_nome, "rb");
-    if(!arq_idx) return -1; // Arquivo não existe
+    if (!arq_idx) return -1;
 
     Cabecalho cab;
     ler_cabecalho(arq_idx, &cab);
     fclose(arq_idx);
 
-    if (cab.endereco_raiz == -1) return -1; // Árvore vazia
+    if (cab.endereco_raiz == -1) return -1;
 
     TABM no_atual;
     TABM_ler_no(arq_idx_nome, cab.endereco_raiz, &no_atual);
 
+    // Navega pela árvore até chegar em um nó folha
     while (!no_atual.eh_folha) {
         int i = 0;
-        // Comparações com long long int
-        while (i < no_atual.num_chaves && cpf > no_atual.chaves[i]) {
+        // Encontra o primeiro filho cujo divisor é MAIOR que a chave
+        while (i < no_atual.num_chaves && cpf >= no_atual.chaves[i]) {
             i++;
         }
-        if (i < no_atual.num_chaves && cpf == no_atual.chaves[i]) {
-            // Em B-Tree, chaves internas podem ter ponteiros de dados.
-            // Aqui, estamos assumindo uma B+ onde os dados estão só nas folhas.
-            // Para encontrar o dado, precisamos descer até a folha.
-            TABM_ler_no(arq_idx_nome, no_atual.filhos[i + 1], &no_atual);
-        } else {
-            TABM_ler_no(arq_idx_nome, no_atual.filhos[i], &no_atual);
-        }
+        // Desce para o filho encontrado [cite: 67, 68]
+        TABM_ler_no(arq_idx_nome, no_atual.filhos[i], &no_atual);
     }
 
-    // Busca na folha
+    // Na folha, faz uma busca linear pela chave
     for (int i = 0; i < no_atual.num_chaves; i++) {
         if (cpf == no_atual.chaves[i]) {
             return no_atual.reg[i]; // Retorna o endereço do registro de dados
         }
     }
+
     return -1; // Não encontrado
 }
 
-// A função de remoção em Árvore-B é complexa devido ao rebalanceamento.
-// A versão original estava incompleta. Esta é uma adaptação simplificada.
+// Função auxiliar para encontrar o nó folha para remoção (o seu já estava bom)
+long long encontrar_folha_para_remocao(const char* arq_idx_nome, long long endereco_no, long long int cpf) {
+    TABM no;
+    TABM_ler_no(arq_idx_nome, endereco_no, &no);
+    while (!no.eh_folha) {
+        int i = 0;
+        while (i < no.num_chaves && cpf >= no.chaves[i]) {
+            i++;
+        }
+        TABM_ler_no(arq_idx_nome, no.filhos[i], &no);
+    }
+    return no.endereco;
+}
+
+// Função auxiliar para remover a chave de um nó folha
+void remover_chave_de_folha(TABM* folha, long long int cpf) {
+    int i = 0;
+    while (i < folha->num_chaves && cpf != folha->chaves[i]) {
+        i++;
+    }
+    if (i == folha->num_chaves) return; // Chave não está na folha
+
+    // Desloca as chaves e registros para preencher o espaço
+    for (int j = i; j < folha->num_chaves - 1; j++) {
+        folha->chaves[j] = folha->chaves[j + 1];
+        folha->reg[j] = folha->reg[j + 1];
+    }
+    folha->num_chaves--;
+}
+
+
 void TABM_remove(const char* arq_idx_nome, long long int cpf) {
-    printf("A função de remoção para Árvore-B é complexa e não está totalmente implementada.\n");
-    printf("Para uma remoção segura, seria necessário implementar a redistribuição e mesclagem de nós.\n");
-    // O código original de remoção foi omitido por estar incompleto e conceitualmente falho.
+    // A implementação completa da remoção com redistribuição e concatenação
+    // em todos os níveis é extremamente complexa.
+    // Esta versão simplificada foca na remoção da folha.
+    // O rebalanceamento completo não está implementado.
+
+    long long endereco_dado = TABM_busca_cpf(arq_idx_nome, cpf);
+    if (endereco_dado == -1) {
+        printf("Erro: CPF %lld não encontrado para remoção.\n", cpf);
+        return;
+    }
+
+    FILE* arq_idx = fopen(arq_idx_nome, "rb+");
+    if (!arq_idx) return;
+
+    Cabecalho cab;
+    ler_cabecalho(arq_idx, &cab);
+    fclose(arq_idx);
+
+    long long endereco_folha = encontrar_folha_para_remocao(arq_idx_nome, cab.endereco_raiz, cpf);
+
+    TABM folha;
+    TABM_ler_no(arq_idx_nome, endereco_folha, &folha);
+
+    // Remove a chave e o ponteiro do registro da folha [cite: 364]
+    remover_chave_de_folha(&folha, cpf);
+
+    TABM_escrever_no(arq_idx_nome, &folha);
+
+    printf("Chave %lld removida da folha. A chave pode permanecer nos nós internos como guia. [cite: 365]\n", cpf);
+    printf("Aviso: O rebalanceamento completo (concatenação/redistribuição) não está implementado.\n");
 }

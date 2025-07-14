@@ -19,6 +19,26 @@ int THEAP_filho_d(int i) {
     return 2 * i + 2;
 }
 
+void THEAP_guarda_tam(long int *tam_heap){
+    FILE *reg_heap = fopen("reg_heap.bin", "wb");
+    if (!reg_heap) {
+        printf("[THEAP_guarda_tamanho] Impossivel criar 'reg_heap.bin'!\n");
+        exit(1);
+    }
+    fwrite(tam_heap, sizeof(long), 1, reg_heap);
+    fclose(reg_heap);
+}
+
+int THEAP_retorna_tam(long int *tam_heap) {
+    FILE *reg_heap = fopen("reg_heap.bin", "rb");
+    if (!reg_heap) {
+        printf("[THEAP_retorna_tamanho] Impossivel ler 'reg_heap.bin'!\n");
+        return 0;
+    }
+    fread(tam_heap, sizeof(long), 1, reg_heap);
+    return 1;
+}
+
 // --- Funções de Manutenção (com I/O abstraído) ---
 
 void THEAP_subir(FILE *heap, int indice, long int *tam_heap) {
@@ -105,7 +125,7 @@ void THEAP_escreve(char *nomeHeap, TA *aluno, long int *tam_heap) {
 
     (*tam_heap)++;
     THEAP_subir(heap, *tam_heap-1, tam_heap);
-
+    THEAP_guarda_tam(tam_heap);
     fclose(heap);
 }
 
@@ -139,6 +159,7 @@ void THEAP_exclui(char *nomeHeap, long int *tam_heap) {
     THEAP_descer(heap, 0, tam_heap);
 
     fclose(heap);
+    THEAP_guarda_tam(tam_heap);
     printf("Aluno: %s, nota:%d, cpf:%lld, indice:%d. REMOVIDO!\n",removido.nome, removido.nota, removido.cpf, 0);
 }
 
@@ -184,7 +205,7 @@ void THEAP_constroi(char *nomeHeap, char *nomeDados, long int *tam_heap) {
     for (int i = (*tam_heap / 2) - 1; i >= 0; i--) {
         THEAP_descer(heap, i, tam_heap);
     }
-
+    THEAP_guarda_tam(tam_heap);
     fclose(heap);
 }
 
@@ -192,18 +213,17 @@ void THEAP_constroi(char *nomeHeap, char *nomeDados, long int *tam_heap) {
 int THEAP_verifica(char *nomeHeap) {
     FILE *heap = fopen(nomeHeap, "rb");
     if (!heap) return 0;
+    long int tam_heap;
+    THEAP_retorna_tam(&tam_heap);
 
-    fseek(heap, 0, SEEK_END);
-    long size = ftell(heap) / sizeof(TA);
-    rewind(heap);
-
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < tam_heap; i++) {
         TA pai, filho_e, filho_d;
+
         fseek(heap, i * sizeof(TA), SEEK_SET);
         TA_leitura(heap, &pai);
 
         int filho_e_idx = THEAP_filho_e(i);
-        if (filho_e_idx < size) {
+        if (filho_e_idx < tam_heap) {
             fseek(heap, filho_e_idx * sizeof(TA), SEEK_SET);
             TA_leitura(heap, &filho_e);
             if (filho_e.nota > pai.nota) {
@@ -214,7 +234,7 @@ int THEAP_verifica(char *nomeHeap) {
         }
 
         int filho_d_idx = THEAP_filho_d(i);
-        if (filho_d_idx < size) {
+        if (filho_d_idx < tam_heap) {
             fseek(heap, filho_d_idx * sizeof(TA), SEEK_SET);
             TA_leitura(heap, &filho_d);
             if (filho_d.nota > pai.nota) {

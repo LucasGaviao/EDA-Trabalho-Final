@@ -11,6 +11,8 @@ int THEAP_pai(int i);
 int THEAP_filho_e(int i);
 int THEAP_filho_d(int i);
 
+void THEAP_guarda_tam(long int *tam_heap);
+int THEAP_retorna_tam(long int *tam_heap);
 
 void THEAP_subir(FILE *heap, int indice, long int *tam_heap);
 void THEAP_descer(FILE *heap, int indice, long int *tam_heap);

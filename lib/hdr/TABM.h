@@ -1,4 +1,4 @@
-// TABM.h
+// TABM.h (Refatorado)
 
 #ifndef TABM_H
 #define TABM_H
@@ -20,27 +20,26 @@ typedef struct {
 typedef struct {
     int eh_folha;
     int num_chaves;
-    long long int chaves[TAM_TABM * 2 - 1]; // Chave agora é long long int
+    long long int chaves[TAM_TABM * 2 - 1];
     long long filhos[TAM_TABM * 2];
     long long endereco;
-    long long reg[TAM_TABM * 2 - 1]; // Endereços dos registros de dados (TA)
-    long long proximo_no; // Para B+ Tree (lista encadeada de folhas)
+    long long reg[TAM_TABM * 2 - 1];
+    long long proximo_no;
 } TABM;
 
-// --- Protótipos das Funções ---
+// --- Protótipos das Funções Públicas ---
 
-// Funções de manipulação do arquivo e nós
+// Funções de manipulação do arquivo e nós (internas, mas úteis para depuração)
 void TABM_ler_no(const char* arq_idx, long long endereco, TABM* no);
 void TABM_escrever_no(const char* arq_idx, TABM* no);
 
-// Funções principais da Árvore-B
+// Funções principais da Árvore-B (a verdadeira API pública)
 void TABM_inicializa(const char* arq_idx_nome);
 void TABM_insere(const char* arq_idx_nome, const char* arq_dados_nome, TA* aluno);
 void TABM_remove(const char* arq_idx_nome, long long int cpf);
 long long TABM_busca_cpf(const char* arq_idx_nome, long long int cpf);
 
-// Funções internas (recursivas e de balanceamento)
-void TABM_insere_recursivo(TABM* no, TA* aluno, const char* arq_idx, const char* arq_dados, Cabecalho* cab);
-void TABM_divisao(TABM* pai, int i_filho, TABM* filho, const char* arq_idx, Cabecalho* cab);
+// Os protótipos das funções recursivas e de divisão foram removidos
+// por serem detalhes de implementação interna do módulo.
 
 #endif //TABM_H

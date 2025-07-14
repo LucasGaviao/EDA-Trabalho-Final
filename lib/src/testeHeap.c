@@ -7,21 +7,18 @@
 
 void testeHeap(char *nomeHeap, char *nomeDados) {
     printf("-=-=-=-=-=-=-=-=-= MENU =-=-=-=-=-=-=-=-=-\nArquivos: - Heap('%s') - Dados('%s')\n 1- Construir Heap.\n 2- Inserir Aluno.\n 3- Remover Aluno.\n 4- Buscar Aluno.\n OUTRO- Sair\n", nomeHeap, nomeDados);
-    FILE *heap_temp = fopen(nomeHeap, "rb");
     long int valor = -1;
     long int *tam_heap = &valor;
-    if (heap_temp == NULL) {
-        *tam_heap = 0;
+
+    if (THEAP_retorna_tam(tam_heap)){
+        printf("[testeHeap] Tamanho atual da heap: %ld.\n", *tam_heap);
     }else {
-        fseek(heap_temp, 0, SEEK_END);
-        *tam_heap = ftell(heap_temp)/sizeof(TA);
+        printf("[testeHeap] Heap ainda não existe. Dica: Crie uma na opção [1]!\n");
     }
-    fclose(heap_temp);
 
     int opcao = 1;
     TA *aluno = TA_inicializa();
     TA *aluno2 = TA_inicializa();
-    int indice = 0, x = 10, imprimir = 0;
     while ((1 <= opcao) && (opcao < 6)) {
         printf("ESCOLHA: ");
         scanf("%d", &opcao);
@@ -71,9 +68,13 @@ void testeHeap(char *nomeHeap, char *nomeDados) {
                 printf("[testeHeap.case4] Busca Realizada!\n");
                 TA_imprime(aluno2);
             }
+        } else if (opcao == 5) {
+            if (THEAP_verifica(nomeHeap)) printf("[testeHeap.case5] Estrutura correta!\n");
+            else printf("[testeHeap.case5] Heap corrompida!\n");
         } else {
             printf("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
             printf("[testeHeap.case6] Saindo de [testeHeap]\n");
+            THEAP_guarda_tam(tam_heap);
             return;
         }
         printf("-=-=-=-=-=-=-=-=-= MENU =-=-=-=-=-=-=-=-=-\nArquivos: - Heap('%s') - Dados('%s')\n 1- Construir Heap.\n 2- Inserir Aluno.\n 3- Remover Aluno.\n 4- Buscar Aluno.\n OUTRO- Sair\n", nomeHeap, nomeDados);
