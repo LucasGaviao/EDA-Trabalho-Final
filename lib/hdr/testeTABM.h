@@ -6,7 +6,6 @@
 #define TESTETABM_H
 #include "TABM.h"
 
-void TABM_constroi(char *nomeTABM, char *nomeTABMdados, char *nomeDados);
 void testeTABM(char *nomeTABM, char *nomeTABMdados, char *nomeDados);
 
 #endif //TESTETABM_H
